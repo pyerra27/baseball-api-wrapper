@@ -1,11 +1,11 @@
 """
-mlb_statsapi
+baseball_api
 ============
 A Python wrapper for the official MLB Stats API (https://statsapi.mlb.com).
 
 Quick start::
 
-    from mlb_statsapi import get_teams
+    from baseball_api import get_teams
 
     teams = get_teams(2024)
     for team in teams:
