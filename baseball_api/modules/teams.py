@@ -26,7 +26,7 @@ Common league IDs:
 
 from typing import Any, Dict, List, Optional
 
-from .client import MLBStatsClient
+from ..client import MLBStatsClient
 
 # The Stats API path for the teams collection resource.
 _TEAMS_PATH = "/api/v1/teams"
