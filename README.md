@@ -1,46 +1,87 @@
 # baseball-api
 
-A Python wrapper for the [official MLB Stats API](https://statsapi.mlb.com).
+A Python wrapper for the official [MLB Stats API](https://statsapi.mlb.com).
 
 ## Installation
 
-Make sure to create and activate a python virtual enviroment
+Clone the repo and install in editable mode so changes to the source are reflected immediately:
 
 ```bash
-pip install -r requirements.txt
+git clone <your-repo-url>
+cd baseball-api
+pip install -e ".[dev]"   # includes pytest and test dependencies
+```
+
+For use in another project without dev tools:
+
+```bash
+pip install -e /path/to/baseball-api
 ```
 
 ## Quick Start
 
 ```python
-from baseball_api import get_teams
+from baseball_api import get_teams, get_roster
 
-# All 30 MLB teams for the 2024 season
+# List all MLB teams for the 2024 season
 teams = get_teams(2024)
 for team in teams:
     print(team["id"], team["name"])
 
-# American League only
-al_teams = get_teams(2024, league_ids=[103])
-
-# Include historical / inactive franchises
-all_franchises = get_teams(2024, active_status="B")
+# Get the active roster for the New York Yankees (teamId=147)
+roster = get_roster(147, season=2024)
+for player in roster:
+    print(player["person"]["fullName"], player["position"]["name"])
 ```
 
-## Running Tests
+## Using the Low-Level Client
 
-```bash
-pytest
+For endpoints not yet covered by a module, use `MLBStatsClient` directly:
+
+```python
+from baseball_api import MLBStatsClient
+
+with MLBStatsClient() as client:
+    data = client.get("/api/v1/standings", params={"leagueId": 103, "season": 2024})
+    print(data)
 ```
 
 ## Project Structure
 
 ```
-baseball_api/
-├── __init__.py      # Public API surface
-├── client.py        # Low-level HTTP client
-└── teams.py         # Teams endpoint wrapper
-
-tests/
-└── test_teams.py    # Unit tests for teams module
+baseball_api/          # Installable package
+    __init__.py        # Public API surface
+    client.py          # Low-level HTTP client (MLBStatsClient, MLBStatsAPIError)
+    modules/
+        teams.py       # get_teams()
+        roster.py      # get_roster()
+tests/                 # pytest test suite
+    test_teams.py
+    test_roster.py
+pyproject.toml         # Build & dependency config
 ```
+
+## Running Tests
+
+```bash
+pytest                        # Run all tests
+pytest --cov=baseball_api     # Run with coverage report
+```
+
+## Error Handling
+
+Network or API errors raise `MLBStatsAPIError`:
+
+```python
+from baseball_api import MLBStatsClient, MLBStatsAPIError
+
+try:
+    with MLBStatsClient() as client:
+        data = client.get("/api/v1/teams/99999")  # Non-existent team
+except MLBStatsAPIError as e:
+    print(f"API error {e.status_code}: {e.message}")
+```
+
+## License
+
+MIT — see [LICENSE](LICENSE) for details.
