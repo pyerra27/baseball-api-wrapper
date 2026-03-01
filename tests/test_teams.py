@@ -1,5 +1,5 @@
 """
-Tests for baseball_api.teams
+Tests for baseball_api.modules.teams
 ==============================
 Uses ``unittest.mock`` to patch HTTP calls so the test suite can run
 without a network connection.
@@ -14,7 +14,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from baseball_api.client import MLBStatsAPIError, MLBStatsClient
-from baseball_api.teams import get_teams, MLB_SPORT_ID
+from baseball_api.modules.teams import get_teams, MLB_SPORT_ID
 
 
 # ---------------------------------------------------------------------------
@@ -205,7 +205,7 @@ class TestGetTeams(unittest.TestCase):
 
     def test_creates_default_client_when_none_provided(self):
         """When no client is given, a default MLBStatsClient should be used."""
-        with patch("baseball_api.teams.MLBStatsClient") as MockClient:
+        with patch("baseball_api.modules.teams.MLBStatsClient") as MockClient:
             mock_instance = MockClient.return_value.__enter__.return_value
             mock_instance.get.return_value = MOCK_API_RESPONSE
 
@@ -217,7 +217,7 @@ class TestGetTeams(unittest.TestCase):
 
             # Re-use get_teams without a client; just ensure it does not raise
             # and that MLBStatsClient was instantiated.
-            with patch("baseball_api.teams.MLBStatsClient") as MC:
+            with patch("baseball_api.modules.teams.MLBStatsClient") as MC:
                 mc_instance = MagicMock()
                 mc_instance.get.return_value = MOCK_API_RESPONSE
                 MC.return_value = mc_instance
