@@ -13,10 +13,12 @@ Quick start::
 """
 
 from .client import MLBStatsAPIError, MLBStatsClient
-from .teams import get_teams
+from .modules.teams import get_teams
+from .modules.roster import get_roster
 
 __all__ = [
     "MLBStatsClient",
     "MLBStatsAPIError",
     "get_teams",
+    "get_roster"
 ]
