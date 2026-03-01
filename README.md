@@ -1,17 +1,19 @@
-# mlb-statsapi
+# baseball-api
 
 A Python wrapper for the [official MLB Stats API](https://statsapi.mlb.com).
 
 ## Installation
 
+Make sure to create and activate a python virtual enviroment
+
 ```bash
-pip install -e .
+pip install -r requirements.txt
 ```
 
 ## Quick Start
 
 ```python
-from mlb_statsapi import get_teams
+from baseball_api import get_teams
 
 # All 30 MLB teams for the 2024 season
 teams = get_teams(2024)
@@ -28,8 +30,7 @@ all_franchises = get_teams(2024, active_status="B")
 ## Running Tests
 
 ```bash
-pip install -e ".[dev]"
-pytest -v
+pytest
 ```
 
 ## Project Structure
