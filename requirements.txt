@@ -1,0 +1,6 @@
+# Runtime dependencies
+requests>=2.28
+
+# Development / testing dependencies
+pytest
+pytest-cov
