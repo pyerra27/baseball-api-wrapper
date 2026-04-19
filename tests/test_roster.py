@@ -1,5 +1,5 @@
 """
-Tests for baseball_api.modules.roster
+Tests for baseball_api_wrapper.modules.roster
 ==============================
 All HTTP calls are mocked — no network connection required.
 
@@ -15,8 +15,8 @@ Test categories:
 import unittest
 from unittest.mock import MagicMock, patch
 
-from baseball_api.client import MLBStatsAPIError, MLBStatsClient
-from baseball_api.modules.roster import RosterType, get_roster
+from baseball_api_wrapper.client import MLBStatsAPIError, MLBStatsClient
+from baseball_api_wrapper.modules.roster import RosterType, get_roster
 
 
 # ---------------------------------------------------------------------------
@@ -221,7 +221,7 @@ class TestGetRoster(unittest.TestCase):
 
     def test_creates_default_client_when_none_provided(self):
         """When no client is given, a default MLBStatsClient should be created."""
-        with patch("baseball_api.modules.roster.MLBStatsClient") as MockClient:
+        with patch("baseball_api_wrapper.modules.roster.MLBStatsClient") as MockClient:
             mc_instance = MagicMock()
             mc_instance.get.return_value = MOCK_API_RESPONSE
             MockClient.return_value = mc_instance
