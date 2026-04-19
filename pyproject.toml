@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "baseball-api"
+name = "baseball-api-wrapper"
 version = "0.1.0"
 description = "A Python wrapper for the official MLB Stats API (https://statsapi.mlb.com)"
 readme = "README.md"
@@ -22,14 +22,14 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-# Automatically discover all packages (baseball_api and sub-packages)
+# Automatically discover all packages (baseball_api_wrapper and sub-packages)
 where = ["."]
-include = ["baseball_api*"]
+include = ["baseball_api_wrapper*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
 
 [tool.coverage.run]
-source = ["baseball_api"]
+source = ["baseball_api_wrapper"]
 omit = ["tests/*"]

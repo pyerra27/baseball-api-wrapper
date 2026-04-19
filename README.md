@@ -1,4 +1,4 @@
-# baseball-api
+# baseball-api-wrapper
 
 A Python wrapper for the official [MLB Stats API](https://statsapi.mlb.com).
 
@@ -8,20 +8,20 @@ Clone the repo and install in editable mode so changes to the source are reflect
 
 ```bash
 git clone <your-repo-url>
-cd baseball-api
+cd baseball-api-wrapper
 pip install -e ".[dev]"   # includes pytest and test dependencies
 ```
 
 For use in another project without dev tools:
 
 ```bash
-pip install -e /path/to/baseball-api
+pip install -e /path/to/baseball-api-wrapper
 ```
 
 ## Quick Start
 
 ```python
-from baseball_api import get_teams, get_roster
+from baseball_api_wrapper import get_teams, get_roster
 
 # List all MLB teams for the 2024 season
 teams = get_teams(2024)
@@ -39,7 +39,7 @@ for player in roster:
 For endpoints not yet covered by a module, use `MLBStatsClient` directly:
 
 ```python
-from baseball_api import MLBStatsClient
+from baseball_api_wrapper import MLBStatsClient
 
 with MLBStatsClient() as client:
     data = client.get("/api/v1/standings", params={"leagueId": 103, "season": 2024})
@@ -49,7 +49,7 @@ with MLBStatsClient() as client:
 ## Project Structure
 
 ```
-baseball_api/          # Installable package
+baseball_api_wrapper/          # Installable package
     __init__.py        # Public API surface
     client.py          # Low-level HTTP client (MLBStatsClient, MLBStatsAPIError)
     modules/
@@ -65,7 +65,7 @@ pyproject.toml         # Build & dependency config
 
 ```bash
 pytest                        # Run all tests
-pytest --cov=baseball_api     # Run with coverage report
+pytest --cov=baseball_api_wrapper     # Run with coverage report
 ```
 
 ## Error Handling
@@ -73,7 +73,7 @@ pytest --cov=baseball_api     # Run with coverage report
 Network or API errors raise `MLBStatsAPIError`:
 
 ```python
-from baseball_api import MLBStatsClient, MLBStatsAPIError
+from baseball_api_wrapper import MLBStatsClient, MLBStatsAPIError
 
 try:
     with MLBStatsClient() as client:
