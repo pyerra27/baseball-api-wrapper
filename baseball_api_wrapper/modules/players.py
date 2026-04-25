@@ -18,6 +18,47 @@ _PLAYER_INFO_PATH = "/api/v1/people/{player_id}"
 _PLAYER_STATS_PATH = "/api/v1/people/{player_id}/stats"
 
 
+def get_player_career_splits(
+    player_id: int,
+    group: str = "hitting",
+    client: Optional[MLBStatsClient] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Return year-by-year career splits for a player.
+
+    Each element in the returned list is a split dict with at minimum:
+    * ``season`` – The season year as a string, e.g. ``"2024"``.
+    * ``stat``   – Dict of raw stat fields for that season.
+
+    Args:
+        player_id: The player's unique MLB identifier.
+        group:     ``"hitting"`` or ``"pitching"``. Defaults to ``"hitting"``.
+        client:    Optional pre-configured MLBStatsClient.
+
+    Returns:
+        A list of split dicts, one per season, or an empty list if none found.
+    """
+    path = _PLAYER_STATS_PATH.format(player_id=player_id)
+    params: Dict[str, Any] = {"stats": "yearByYear", "group": group, "hydrate": "team"}
+
+    _owns_client = client is None
+    if _owns_client:
+        client = MLBStatsClient()
+
+    try:
+        data = client.get(path, params=params)
+    finally:
+        if _owns_client:
+            client.close()
+
+    for stat_block in data.get("stats", []):
+        splits = stat_block.get("splits", [])
+        if splits:
+            return splits
+
+    return []
+
+
 def get_player_info(
     player_id: int,
     client: Optional[MLBStatsClient] = None,
