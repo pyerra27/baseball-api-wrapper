@@ -7,7 +7,8 @@ name = "baseball-api-wrapper"
 version = "0.1.0"
 description = "A Python wrapper for the official MLB Stats API (https://statsapi.mlb.com)"
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.9"
 dependencies = [
     "requests>=2.28",
