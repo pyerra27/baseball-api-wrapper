@@ -31,3 +31,5 @@ Thumbs.db
 
 # Environment variables
 .env
+# Local MLB Stats API reference material (kept out of the repo for size)
+docs/
