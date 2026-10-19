@@ -4,18 +4,20 @@ A Python wrapper for the official [MLB Stats API](https://statsapi.mlb.com).
 
 ## Installation
 
+Install from [PyPI](https://pypi.org/project/baseball-api-wrapper/):
+
+```bash
+pip install baseball-api-wrapper
+```
+
+### Development
+
 Clone the repo and install in editable mode so changes to the source are reflected immediately:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/pyerra27/baseball-api-wrapper.git
 cd baseball-api-wrapper
 pip install -e ".[dev]"   # includes pytest and test dependencies
-```
-
-For use in another project without dev tools:
-
-```bash
-pip install -e /path/to/baseball-api-wrapper
 ```
 
 ## Quick Start
