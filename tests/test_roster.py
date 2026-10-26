@@ -18,7 +18,6 @@ from unittest.mock import MagicMock, patch
 from baseball_api_wrapper.client import MLBStatsAPIError, MLBStatsClient
 from baseball_api_wrapper.modules.roster import RosterType, get_roster
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

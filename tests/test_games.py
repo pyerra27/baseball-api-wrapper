@@ -15,12 +15,11 @@ from unittest.mock import MagicMock, patch
 
 from baseball_api_wrapper.client import MLBStatsAPIError, MLBStatsClient
 from baseball_api_wrapper.modules.games import (
+    MLB_SPORT_ID,
     get_boxscore,
     get_game_by_pk,
     get_schedule,
-    MLB_SPORT_ID,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures

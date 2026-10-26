@@ -17,7 +17,8 @@ Clone the repo and install in editable mode so changes to the source are reflect
 ```bash
 git clone https://github.com/pyerra27/baseball-api-wrapper.git
 cd baseball-api-wrapper
-pip install -e ".[dev]"   # includes pytest and test dependencies
+pip install -e ".[dev]"   # includes pytest, ruff and test dependencies
+ruff check .              # import order + unused imports (check only)
 ```
 
 ## Quick Start
