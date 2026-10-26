@@ -4,22 +4,24 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "baseball-api-wrapper"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Python wrapper for the official MLB Stats API (https://statsapi.mlb.com)"
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
-    "requests>=2.28",
+    "requests>=2.32.4",  # Floor excludes CVE-2023-32681, CVE-2024-35195, CVE-2024-47081
 ]
 
 [project.optional-dependencies]
 # Install dev/test tools with: pip install -e ".[dev]"
 dev = [
-    "pytest>=7.0",
-    "pytest-cov>=4.0",
-    "responses>=0.23",   # Mock HTTP responses in tests
+    "pytest==9.0.2",
+    "pytest-cov==7.0.0",
+    "ruff==0.17.2",      # Lint: import order + unused imports
+    "build==1.6.1",      # Release: build sdist + wheel
+    "twine==7.0.0",      # Release: check and upload to PyPI
 ]
 
 [tool.setuptools.packages.find]
@@ -34,3 +36,7 @@ addopts = "-v --tb=short"
 [tool.coverage.run]
 source = ["baseball_api_wrapper"]
 omit = ["tests/*"]
+
+[tool.ruff.lint]
+# Check only (no --fix): import sorting/grouping (I) and unused imports (F401)
+select = ["I", "F401"]

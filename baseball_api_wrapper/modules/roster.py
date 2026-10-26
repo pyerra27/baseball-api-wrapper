@@ -23,6 +23,7 @@ enum.  The most commonly used types are:
 * ``COACH``           – Coaching staff.
 """
 
+import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -154,8 +155,6 @@ def _validate_date(date: str) -> None:
     Raises:
         ValueError: If the string is not a valid ``YYYY-MM-DD`` date.
     """
-    import datetime
-
     try:
         datetime.date.fromisoformat(date)
     except ValueError:

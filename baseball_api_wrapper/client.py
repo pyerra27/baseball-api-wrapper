@@ -7,8 +7,9 @@ This module provides a low-level HTTP client that handles request construction,
 error handling, and response parsing for the MLB Stats API.
 """
 
-import requests
 from typing import Any, Dict, Optional
+
+import requests
 
 
 class MLBStatsAPIError(Exception):
