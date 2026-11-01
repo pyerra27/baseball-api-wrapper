@@ -24,7 +24,7 @@ ruff check .              # import order + unused imports (check only)
 ## Quick Start
 
 ```python
-from baseball_api_wrapper import get_teams, get_roster
+from baseball_api_wrapper import get_teams, get_roster, search_players
 
 # List all MLB teams for the 2024 season
 teams = get_teams(2024)
@@ -35,6 +35,10 @@ for team in teams:
 roster = get_roster(147, season=2024)
 for player in roster:
     print(player["person"]["fullName"], player["position"]["name"])
+
+# Search for players by name; each word matches the start of a name
+for player in search_players("aaron jud", limit=5):
+    print(player["id"], player["fullName"])
 ```
 
 ## Using the Low-Level Client

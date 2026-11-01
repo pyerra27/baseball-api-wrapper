@@ -3,19 +3,22 @@ Players
 =======
 Functions for retrieving player information and statistics from the MLB Stats API.
 
-The two primary entry points are:
+The primary entry points are:
 
 * :func:`get_player_info`  – Basic biographical data for a player.
 * :func:`get_player_stats` – Season statistics for a player, split by group
                              (``"hitting"`` or ``"pitching"``).
+* :func:`search_players`   – Players whose names match a search string.
 """
 
 from typing import Any, Dict, List, Optional
 
 from ..client import MLBStatsClient
+from .teams import MLB_SPORT_ID
 
 _PLAYER_INFO_PATH = "/api/v1/people/{player_id}"
 _PLAYER_STATS_PATH = "/api/v1/people/{player_id}/stats"
+_PLAYER_SEARCH_PATH = "/api/v1/people/search"
 
 
 def get_player_career_splits(
@@ -176,3 +179,90 @@ def get_player_stats(
             return splits[0].get("stat")
 
     return None
+
+
+def search_players(
+    name: str,
+    sport_id: int = MLB_SPORT_ID,
+    active: Optional[bool] = None,
+    limit: Optional[int] = None,
+    client: Optional[MLBStatsClient] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Return players whose names match a search string.
+
+    Each word in *name* matches the start of a first, last, or other name,
+    and every word must match: ``"jud"`` finds Aaron Judge and Wally Judnich,
+    while ``"aaron jud"`` finds only Aaron Judge. Matching ignores case and
+    accents, so ``"acuna"`` finds Ronald Acuña Jr. A comma searches for
+    several names at once, e.g. ``"judge,ohtani"``.
+
+    Results cover every era and list active players first. They can include
+    minor leaguers who have never played in the majors; those players have
+    no ``mlbDebutDate``.
+
+    Args:
+        name:
+            All or part of a player's name, e.g. ``"judge"`` or ``"aaron j"``.
+        sport_id:
+            Top-level sport identifier. Defaults to ``1`` (MLB).
+        active:
+            ``True`` for active players only, ``False`` for inactive players
+            only. Omit to search both.
+        limit:
+            Maximum number of players to return. The API returns at most 50,
+            however high this is set.
+        client:
+            Optional pre-configured :class:`~baseball_api_wrapper.client.MLBStatsClient`.
+            If omitted, a default client is created for the single call.
+
+    Returns:
+        A list of player dicts as returned by the MLB Stats API, or an empty
+        list if no players match.
+
+    Raises:
+        baseball_api_wrapper.client.MLBStatsAPIError:
+            If the API returns a non-2xx HTTP status code.
+        requests.RequestException:
+            On network-level failures.
+        ValueError:
+            If *name* is blank or *limit* is less than 1.
+
+    Example::
+
+        from baseball_api_wrapper import search_players
+
+        # Aaron Judge's id is 592450
+        for player in search_players("aaron judge"):
+            print(player["id"], player["fullName"])
+    """
+    query = name.strip()
+    if not query:
+        # The API doesn't reject a blank search; it returns a default list of players.
+        raise ValueError("name must not be blank")
+    if limit is not None and limit < 1:
+        raise ValueError(f"limit must be at least 1, got {limit!r}")
+
+    params: Dict[str, Any] = {
+        "names": query,
+        "sportIds": sport_id,
+    }
+
+    if active is not None:
+        # Send the API's lowercase form; requests would send "True" or "False".
+        params["active"] = "true" if active else "false"
+
+    if limit is not None:
+        params["limit"] = limit
+
+    _owns_client = client is None
+    if _owns_client:
+        client = MLBStatsClient()
+
+    try:
+        data = client.get(_PLAYER_SEARCH_PATH, params=params)
+    finally:
+        if _owns_client:
+            client.close()
+
+    return data.get("people", [])
