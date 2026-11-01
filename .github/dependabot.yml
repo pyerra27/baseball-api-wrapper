@@ -1,0 +1,10 @@
+version: 2
+updates:
+  # Opens PRs that move the pinned Action SHAs to new releases. The cooldown
+  # keeps to the rule of only taking releases at least two weeks old.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
