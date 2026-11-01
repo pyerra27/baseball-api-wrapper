@@ -11,6 +11,9 @@ Test categories:
                                 error propagation, default client.
     * get_player_career_splits – all splits returned, empty list when no data,
                                  correct params (yearByYear, hydrate), group forwarding.
+    * search_players          – people list returned, empty list when no data, search
+                                path, names/sportIds/active/limit params, ValueError on
+                                bad input, error propagation, default client.
 """
 
 import unittest
@@ -21,6 +24,7 @@ from baseball_api_wrapper.modules.players import (
     get_player_career_splits,
     get_player_info,
     get_player_stats,
+    search_players,
 )
 
 # ---------------------------------------------------------------------------
@@ -117,6 +121,37 @@ MOCK_CAREER_EMPTY_RESPONSE = {
             "splits": [],
         }
     ],
+}
+
+MOCK_SEARCH_RESPONSE = {
+    "people": [
+        {
+            "id": 592450,
+            "fullName": "Aaron Judge",
+            "primaryPosition": {
+                "code": "9",
+                "name": "Outfielder",
+                "type": "Outfielder",
+                "abbreviation": "RF",
+            },
+            "active": True,
+            "mlbDebutDate": "2016-08-13",
+        },
+        {
+            "id": 116786,
+            "fullName": "Joe Judge",
+            "primaryPosition": {
+                "code": "3",
+                "name": "First Base",
+                "type": "Infielder",
+                "abbreviation": "1B",
+            },
+            "active": False,
+            "mlbDebutDate": "1915-09-20",
+            "lastPlayedDate": "1934-05-12",
+        },
+    ],
+    "copyright": "Copyright 2024 MLB",
 }
 
 
@@ -345,6 +380,119 @@ class TestGetPlayerCareerSplits(unittest.TestCase):
             mc_instance.get.return_value = MOCK_CAREER_RESPONSE
             MockClient.return_value = mc_instance
             result = get_player_career_splits(660271)
+            MockClient.assert_called_once()
+            self.assertEqual(len(result), 2)
+
+
+# ---------------------------------------------------------------------------
+# Tests: search_players
+# ---------------------------------------------------------------------------
+
+class TestSearchPlayers(unittest.TestCase):
+
+    def test_returns_people_list(self):
+        """search_players should return the 'people' list as-is."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        result = search_players("judge", client=client)
+        self.assertEqual([p["fullName"] for p in result], ["Aaron Judge", "Joe Judge"])
+
+    def test_returns_empty_list_when_people_key_missing(self):
+        """An empty list should be returned when the 'people' key is absent."""
+        client = _mock_client({"copyright": "MLB"})
+        result = search_players("zzqxv", client=client)
+        self.assertEqual(result, [])
+
+    def test_correct_path_called(self):
+        """The search endpoint should be called."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("judge", client=client)
+        path_called = client.get.call_args[0][0]
+        self.assertEqual(path_called, "/api/v1/people/search")
+
+    def test_name_forwarded_stripped(self):
+        """The name should be stripped and sent as the 'names' param."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("  aaron jud  ", client=client)
+        _, kwargs = client.get.call_args
+        self.assertEqual(kwargs["params"]["names"], "aaron jud")
+
+    def test_default_sport_id_is_mlb(self):
+        """The default sportIds param should be 1 (MLB)."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("judge", client=client)
+        _, kwargs = client.get.call_args
+        self.assertEqual(kwargs["params"]["sportIds"], 1)
+
+    def test_custom_sport_id_forwarded(self):
+        """A custom sport_id should be forwarded as sportIds."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("judge", sport_id=11, client=client)
+        _, kwargs = client.get.call_args
+        self.assertEqual(kwargs["params"]["sportIds"], 11)
+
+    def test_active_true_sent_as_lowercase_string(self):
+        """active=True should be sent as 'true'."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("judge", active=True, client=client)
+        _, kwargs = client.get.call_args
+        self.assertEqual(kwargs["params"]["active"], "true")
+
+    def test_active_false_sent_as_lowercase_string(self):
+        """active=False should be sent as 'false'."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("judge", active=False, client=client)
+        _, kwargs = client.get.call_args
+        self.assertEqual(kwargs["params"]["active"], "false")
+
+    def test_active_omitted_when_none(self):
+        """The 'active' param should be absent when active is None."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("judge", client=client)
+        _, kwargs = client.get.call_args
+        self.assertNotIn("active", kwargs["params"])
+
+    def test_limit_forwarded(self):
+        """A limit should be forwarded as-is."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("judge", limit=10, client=client)
+        _, kwargs = client.get.call_args
+        self.assertEqual(kwargs["params"]["limit"], 10)
+
+    def test_limit_omitted_when_none(self):
+        """The 'limit' param should be absent when limit is None."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        search_players("judge", client=client)
+        _, kwargs = client.get.call_args
+        self.assertNotIn("limit", kwargs["params"])
+
+    def test_raises_value_error_for_blank_name(self):
+        """A blank name should raise ValueError without calling the API."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        with self.assertRaises(ValueError):
+            search_players("   ", client=client)
+        client.get.assert_not_called()
+
+    def test_raises_value_error_for_limit_below_one(self):
+        """A limit below 1 should raise ValueError without calling the API."""
+        client = _mock_client(MOCK_SEARCH_RESPONSE)
+        with self.assertRaises(ValueError):
+            search_players("judge", limit=0, client=client)
+        client.get.assert_not_called()
+
+    def test_api_error_propagates(self):
+        """MLBStatsAPIError from the client should propagate to the caller."""
+        client = MagicMock(spec=MLBStatsClient)
+        client.get.side_effect = MLBStatsAPIError(500, "Internal Server Error")
+        with self.assertRaises(MLBStatsAPIError):
+            search_players("judge", client=client)
+
+    def test_creates_default_client_when_none_provided(self):
+        """A default MLBStatsClient should be created when none is supplied."""
+        with patch("baseball_api_wrapper.modules.players.MLBStatsClient") as MockClient:
+            mc_instance = MagicMock()
+            mc_instance.get.return_value = MOCK_SEARCH_RESPONSE
+            MockClient.return_value = mc_instance
+            result = search_players("judge")
             MockClient.assert_called_once()
             self.assertEqual(len(result), 2)
 
