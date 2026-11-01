@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "baseball-api-wrapper"
-version = "0.3.0"
+version = "0.3.1"
 description = "A Python wrapper for the official MLB Stats API (https://statsapi.mlb.com)"
 readme = "README.md"
 license = "MIT"
@@ -12,6 +12,7 @@ license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = [
     "requests>=2.32.4",  # Floor excludes CVE-2023-32681, CVE-2024-35195, CVE-2024-47081
+    "certifi>=2026.10.19",  # Floor excludes GHSA-6q48-6c7w-9gw2 (compromised emSign CA)
 ]
 
 [project.optional-dependencies]
